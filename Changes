@@ -1,0 +1,6 @@
+Revision history for Perl extension Geo::Postcodes
+--------------------------------------------------
+0.01  Mon Jul 10 12:40:00 2006
+	- original version; created by h2xs 1.22 with options
+		-Xan Geo::Postcodes
+
