@@ -2,6 +2,7 @@ Changes
 MANIFEST
 Makefile.PL
 Postcodes.pm
+Postcodes/Update.pm
 README
 SUBCLASS
 t/1.t

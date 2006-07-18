@@ -1,6 +1,17 @@
 Revision history for Perl extension Geo::Postcodes
 --------------------------------------------------
-0.01  Mon Jul 10 12:40:00 2006
-	- original version; created by h2xs 1.22 with options
-		-Xan Geo::Postcodes
+2006-07-18 23:00 Arne Sommer
+ * Released version 0.02.
 
+2006-07-18 18:00 Arne Sommer
+ * Added the 'methods' and 'is_method' method/procedure.
+
+2006-07-15 12:00 Arne Sommer
+ * Added the 'selection' method/procedure, and made it
+   callable from the child classes (with some black magic).
+
+2006-07-10 16:00 Arne Sommer
+ * Released version 0.01.
+
+2006-07-07 19:00 Arne Sommer
+ * Original version; created by "h2xs -Xan Geo::Postcodes".
