@@ -1,5 +1,30 @@
 Revision history for Perl extension Geo::Postcodes
 --------------------------------------------------
+2006-07-23 14:00 Arne Sommer
+ * Released version 0.03.
+
+2006-07-23 10:00 Arne Sommer
+ * Simplified the 'selection' code by removing the need
+   for passing a list of legal methods. This is now obtained
+   by the selection code itself.
+
+2006-07-19 22:00 Arne Sommer
+ * Added the 'get_types' procedure that returns all the
+   types (of the postal locations). Added the 'type2verbose'
+   procedure to convert the code to an english text.
+
+2006-07-20 18:00 Arne Sommer
+ * Made a major rewrite of the documentation.
+
+2006-07-19 14:00 Arne Sommer
+ * Merged the national (norwegian and danish) postal
+   type codes, and moved them here. 'type' and 'type_of'
+   will now give the code (instead of the description).
+   Use the new prodeure 'type_verbose_of' and method
+   'type_verbose' for the description. The base class
+   has english texts, but this can be overruled by the
+   derived classes.
+
 2006-07-18 23:00 Arne Sommer
  * Released version 0.02.
 
