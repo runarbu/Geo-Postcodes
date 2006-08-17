@@ -3,18 +3,18 @@ package Geo::Postcodes;
 use strict;
 use warnings;
 
-our $VERSION = '0.03';
+our $VERSION = '0.10';
 
 ## Which methods are available ##################################################
 
-my @valid_methods = qw(postcode location borough county type type_verbose owner address selection);
-  # Used by the 'methods' method.
+my @valid_methods = qw(postcode location borough county type type_verbose owner
+                       address);  # Used by the 'get_methods' procedure.
 
 my %valid_methods;
 
 foreach (@valid_methods)
 {
-  $valid_methods{$_} = 1;
+  $valid_methods{$_} = 1; # Used by 'is_method' for easy lookup.
 }
 
 ## Type Description #############################################################
@@ -47,32 +47,32 @@ sub new
   my $postcode   = shift;
   my $self       = shift; # Allow for subclassing.
 
-  return undef unless valid($postcode);
+  return unless valid($postcode);
 
   unless ($self)
   {
     $self = bless \(my $dummy), $class;
   }
 
-  $postcode_of  {$self} = $postcode;
-  $location_of  {$self} = location_of($postcode);
-  $borough_of   {$self} = borough_of($postcode);
-  $county_of    {$self} = county_of($postcode);
-  $type_of      {$self} = type_of($postcode);
-  $owner_of     {$self} = owner_of($postcode);
-  $address_of   {$self} = address_of($postcode);
+  $postcode_of {$self} =              $postcode;
+  $location_of {$self} = location_of ($postcode);
+  $borough_of  {$self} = borough_of  ($postcode);
+  $county_of   {$self} = county_of   ($postcode);
+  $type_of     {$self} = type_of     ($postcode);
+  $owner_of    {$self} = owner_of    ($postcode);
+  $address_of  {$self} = address_of  ($postcode);
   return $self;
 }
 
 sub DESTROY {
   my $dead_body = $_[0];
-  delete $postcode_of  {$dead_body};
-  delete $location_of  {$dead_body};
-  delete $borough_of   {$dead_body};
-  delete $county_of    {$dead_body};
-  delete $type_of      {$dead_body};
-  delete $owner_of     {$dead_body};
-  delete $address_of   {$dead_body};
+  delete $postcode_of {$dead_body};
+  delete $location_of {$dead_body};
+  delete $borough_of  {$dead_body};
+  delete $county_of   {$dead_body};
+  delete $type_of     {$dead_body};
+  delete $owner_of    {$dead_body};
+  delete $address_of  {$dead_body};
 }
 
 sub postcode
@@ -140,13 +140,20 @@ sub address
   return;
 }
 
-sub methods
+#################################################################################
+
+sub get_postcodes      ## Return all the postcodes, unsorted.
+{
+  return;
+}
+
+sub get_methods        ## Get a list of legal methods for the class/object.
 {
   return @valid_methods;
 }
 
-sub is_method
-{
+sub is_method          ## Is the specified method legal. Can be called as
+{                      ## a procedure, or as a method.
   my $method = shift;
   $method    = shift if $method =~ /Geo::Postcodes/; # Called on an object.
 
@@ -154,7 +161,7 @@ sub is_method
   return 0;
 }
 
-## Global Procedures  - Stub Version, Please Subclass ###########################
+## Global Procedures  - Stub Version, Override in your subclass #################
 
 sub legal # Is it a legal code, i.e. something that follows the syntax rule.
 {
@@ -214,88 +221,210 @@ sub type2verbose
   return $typedesc{$type};
 }
 
-sub get_postcodes
-{
-  return;
-}
-
-## Returns a list of postcodes if called as a procedure; Geo::Postcodes::NO::selection(xx => 'yy')
-## Returns a list of objects if called as a method;      Geo::Postcodes::NO->selection(xx => 'yy')
-
 sub selection
 {
   return Geo::Postcodes::_selection("Geo::Postcodes", @_);
+    # Black magick.
 }
+
+my %legal_mode; $legal_mode{and} = $legal_mode{or}  = 1;
+                $legal_mode{not} = $legal_mode{all} = 1;
+
+#################################################################################
+#                                                                               #
+#  Returns a list of postcodes if called as a procedure;                        #
+#    Geo::Postcodes::XX::selection(xx => 'yy')                                  #
+#  Returns a list of objects if called as a method;                             #
+#    Geo::Postcodes::XX->selection(xx => 'yy')                                  #
+#                                                                               #
+# Note that 'or' and 'not' are not written efficient, as they recompile the     #
+# regular expression(s) for every postcode.                                     #
+#                                                                               #
+#################################################################################
 
 sub _selection
 {
-  my $prefix         = shift;
-  my $oo             = 0; 
-  my $method         = shift;
+  my $caller_class      = shift;
+  my $mode              = shift; # Legal values are 'and' and 'or'.
 
-  if ($method =~ /Geo::Postcodes/)
+  my $objects_requested = 0; # Not object oriented.
+
+  if ($mode eq $caller_class) ## was =~ /Geo::Postcodes/)
   {
-    $oo     = 1;
-    $method = shift;
+    $objects_requested  = 1;
+    $mode               = shift;
   }
 
-  my $is_method = $prefix . "::is_method";
-  my $is_method_pointer = \&{$is_method};
-
-  return unless &$is_method_pointer($method);
-
-  my $value = shift;               # The value to search for
-
-  return unless $value;            # A validity check is impossible, so this is the next best thing.
-
-# if ($value =~ /\|/) - should be '$method'
-# {
-#   my @value_fixed;
-#   foreach my $new_value (split /|/, $value)
-#   {
-#     $new_value =~ s/%/\.\*/g;
-#     $new_value = "^$new_value\$";
-#     push(@value_fixed, $new_value);
-#   }
-#   $value = "(^" . join("|", @value_fixed) . "\$)";
-# }
-# else
-# {
-    $value =~ s/%/\.\*/g;
-#   $value = "^$value\$";
-# }
-
-  my $current_value;
-  my @set = ();
-
-  my $procedure = $prefix . '::' . $method .'_of'; # From method to procedure.
-  my $pointer = \&{$procedure};                            #  and get a pointer to it.
-
-  my $procedure2 = $prefix . '::get_postcodes';
-  my $pointer2   = \&{$procedure2};
- 
-  foreach (&$pointer2())
+  unless ($legal_mode{$mode})    # Check for old-style one-method-and-value usage
   {
-    $current_value = $pointer->($_);    ## Call the procedure with the current postcode
-    next unless $current_value;         ## Skip postcodes without this field.
+    unshift(@_, $mode);          # The method, put it back.
+    $mode = 'and';               # It doesn't really matter, but we must choose one.
+  }
 
-    if ($current_value =~ m{^$value$}i) ## Case insensitive
+  return unless $legal_mode{$mode};
+
+  my @out = ();
+
+  ###############################################################################
+
+  if ($mode eq "and")
+  {
+    my $method;
+    my $value;
+    my @argument_list = @_;
+
+    my @in = &{&proc_pointer($caller_class . '::get_postcodes')}();
+      # Get all the postcodes.
+
+    while (@argument_list)
     {
-       push(@set, $_);
+      @out = (); # Cleanup after the previous loop iteration.
+
+      $method = shift(@argument_list);
+      return unless &{&proc_pointer($caller_class . '::is_method')}($method);
+        # Return if the specified method is undefined for the class.
+        # As and 'and' with a list with one undefined item gives an empty list.
+
+      $value  = shift(@argument_list);
+      return unless $value;
+        # A validity check is impossible, so this is the next best thing.
+
+      $value =~ s/%/\.\*/g;
+
+      my $current_value;
+      my $current_method = &proc_pointer($caller_class . '::' . $method .'_of');
+
+      foreach my $postcode (@in)
+      {
+        $current_value = $current_method->($postcode);
+          # Call the procedure with the current postcode as argument
+
+        next unless $current_value;
+          # Skip postcodes without this field.
+
+        push(@out, $postcode) if $current_value =~ m{^$value$}i; ## Case insensitive
+      }
+      @in = @out if @argument_list;
     }
   }
-  @set = sort @set;
 
-  return @set unless $oo;
+  ###############################################################################
 
-  my @oo_set;
-
-  foreach (@set)
+  elsif ($mode eq "or")
   {
-    push(@oo_set, $prefix->new($_));
+    my $method;
+    my $value;
+
+POSTCODE:
+    foreach my $postcode (&{&proc_pointer($caller_class . '::get_postcodes')}()) # Get all the postcodes.
+    {
+      my @argument_list = @_;
+METHOD:
+      while (@argument_list)
+      {
+        $method = shift(@argument_list);
+        next POSTCODE unless &{&proc_pointer($caller_class . '::is_method')}($method);
+          # Simply skip unknown methods, as that it doesn't screw up our 'or' list in any way.
+
+        $value  = shift(@argument_list);
+        next POSTCODE unless $value;
+          # A validity check is impossible, so this is the next best thing.
+
+        $value =~ s/%/\.\*/g;
+
+        my $current_method = &proc_pointer($caller_class . '::' . $method .'_of');
+
+        my $current_value  = $current_method->($postcode);
+          # Call the procedure with the current postcode as argument
+
+        next unless $current_value;
+          # Skip postcodes without this field.
+
+        if ($current_value =~ m{^$value$}i)
+	{
+          push(@out, $postcode); ## Case insensitive
+          next POSTCODE;
+	}
+      }
+    }
+  }
+  ###############################################################################
+
+  elsif ($mode eq "not") # Only include the postcode if it doesn't match any of the arguments.
+  {                      # as 'or', but next postcode if matching, and include the postcode
+    my $method;
+    my $value;
+
+POSTCODE_NOT:
+    foreach my $postcode (&{&proc_pointer($caller_class . '::get_postcodes')}()) # Get all the postcodes.
+    {
+      my @argument_list = @_;
+
+      while (@argument_list)
+      {
+        $method = shift(@argument_list);
+        next POSTCODE_NOT unless &{&proc_pointer($caller_class . '::is_method')}($method);
+          # Simply skip unknown methods, as that it doesn't screw up our 'or' list in any way.
+
+        $value  = shift(@argument_list);
+        next POSTCODE_NOT unless $value;
+          # A validity check is impossible, so this is the next best thing.
+
+        $value =~ s/%/\.\*/g;
+
+        my $current_method = &proc_pointer($caller_class . '::' . $method .'_of');
+
+        my $current_value  = $current_method->($postcode);
+          # Call the procedure with the current postcode as argument
+
+        next unless $current_value;
+          # Skip postcodes without this field.
+
+        next POSTCODE_NOT if $current_value =~ m{^$value$}i;
+          # A match
+      }
+
+      push(@out, $postcode); ## Case insensitive
+        # Include the postcode if none of the methods gave a match.
+    }
+  }
+  ###############################################################################
+
+  elsif ($mode eq "all")
+  {
+    @out = &{&proc_pointer($caller_class . '::get_postcodes')}();
+      # This one isn't very useful, as it duplicates 'get_postcodes'.
+      # But it can be used object oriented to get all the objects, if
+      # time (and memory usage) is of no importance.
   }
 
-  return @oo_set;
+  ###############################################################################
+
+  @out = sort @out;
+    # This will give an ordered list, as opposed to a semi random order. This   #
+    # is essential when comparing lists of postcodes, as the test scripts do.   #
+
+  ###############################################################################
+
+  return unless @out;
+    # Return undef if we have an empty list.
+
+  return @out unless $objects_requested;
+
+  my @out_objects;
+
+  foreach my $postcode (@out)
+  {
+    push(@out_objects, $caller_class->new($postcode));
+  }
+
+  return @out_objects;
+}
+
+sub proc_pointer
+{
+  my $procedure_name = shift;
+  return \&{$procedure_name};
 }
 
 1;
@@ -326,10 +455,71 @@ some black magic):
 
  my @postcodes = Geo::Postcodes::XX::selection($method => $string);
 
-Use this to get a list of all the postcodes associated with the
-specified method and string, where 'XX' is substituted by a country
-subclass 'XX'. The methods can be anyone given by the
-C<Geo::Postcodes::XX::methods()> call.
+This simple form will give a list of postcodes matching the specified method
+and string. Substitute 'XX' by a valid country subclass. The methods can be 
+anyone given by the C<Geo::Postcodes::XX::get_methods()> call. The resulting
+list of postcodes is sorted.
+
+It is possible to specify more than one method/string pair, but then the mode 
+must be given. Use as many metod/value-pairs as required. (The mode can be
+specified for the one pair version of 'or|and' as well, but will have no effect.)
+
+=over
+
+=item and
+
+The postcode is included in the result if it is included in B<all> the expressions.
+
+ my @postcodes = Geo::Postcodes::XX::selection('and',
+    $method => $string, $method2 => $string2, ...);
+
+Return postcodes matching I<all> the method/string pairs.
+
+The computation will work faster if the method/string pairs are given with the one with
+the most matches first, and the one with the least matches last.
+given first
+
+=item or
+
+The postcode is included in the result if it is included in at least B<one of> the
+expressions.
+
+ my @postcodes4 = Geo::Postcodes::XX::selection('or',
+    $method => $string, $method2 => $string2);
+
+Return postcodes matching I<one or more> of the method/string pairs.
+
+The computation will work faster if the method/string pairs are given with the one with
+the least matches first, and the one with the most matches last.
+given first
+
+
+=item not
+
+The postcode is included in the result if it is included in B<none of> the expressions.
+
+ my @postcodes4 = Geo::Postcodes::XX::selection('not',
+    $method => $string, $method2 => $string2);
+
+Return the postcodes I<not> matching any of the method/string pairs. (This is the same as
+C<all - or>, on sets of postcodes.)
+
+=item all
+
+All the postcodes.
+
+ my @postcodes4 = Geo::Postcodes::XX::selection('all');
+
+This will simply return I<all> the postcodes. Any additional arguments 
+are silentliy ignored.
+
+This is the same as I<sort(get_postcodes())>. The object oriented version
+(see below for syntax) will return a postcode object for each postcode,
+and can be handy in some circumstances - if time and memory usage is
+of no concern. Otherwise create the postcode objects only when needed,
+inside a I<foreach>-loop.
+
+=back
 
 The search string is parsed as the regular expression C<m{^$string$}i>.
 This has the following implications:
@@ -423,7 +613,7 @@ is wrapped in. Use I<'%(ÅS|SKOG)'> to get the desired result.
 
 =head2 selection method
 
- my @postcodobjects = Geo::Postcodes::XX->selection($method => $string);
+ my @postcodobjects = Geo::Postcodes::XX->selection(xxxx);
 
 This works just as the procedure version (see above), but will return
 a list of postcode objects (instead of just the postcodes).
@@ -489,11 +679,16 @@ Use C<type2verbose> (see above) to get the description for a given code.
 
 This module uses "inside out objects".
 
+C<Selection or> and C<Selection not> is not written efficiently, as the
+regular expressions are recompiled for every postcode. This will be fixed
+in the future.
+
 =head1 SEE ALSO
 
 The latest version of this library should always be available on CPAN, but see
 also the library home page; L<http://bbop.org/perl/GeoPostcodes> for additional
-information and sample usage.
+information and sample usage. The child classes that can be found there have
+some sample programs.
 
 =head1 AUTHOR
 

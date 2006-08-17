@@ -1,5 +1,34 @@
 Revision history for Perl extension Geo::Postcodes
 --------------------------------------------------
+2006-08-17 15:00 Arne Sommer
+ * Released version 0.10.
+
+2006-08-16 22:00 Arne Sommer
+ * Fixed an error that caused a list with one element
+   (a zero) to be returned instead of 'undef' by
+   selection when no matches was found.
+
+2006-08-05 19:00 Arne Sommer
+ * Added support for 'selection("all", ...)'. It does
+   exactly the same as 'get_postcodes' (but sorts the
+   postcodes). It can be used to get them as objects,
+   in oo-mode. This will consume a lot of memory - and
+   time.
+
+2006-08-05 19:00 Arne Sommer
+ * Added support for 'selection("not", ...)'. It will
+   include the postcode if it doesn't match any of the
+   specified method/value pairs.
+
+2006-07-30 14:00 Arne Sommer
+ * Added support in 'selection' for multiple sets
+   of method/value. This requires a choice of how
+   to treat the combination, and this is controlled
+   by the new 'and' and 'or' paramter.
+
+2006-07-30 09:00 Arne Sommer
+ * Renamed the 'methods' procedure/method to 'get_methods'.
+
 2006-07-23 14:00 Arne Sommer
  * Released version 0.03.
 

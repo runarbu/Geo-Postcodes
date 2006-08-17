@@ -2,7 +2,7 @@
 #                                                                             #
 #                     Geo::Postcodes - Stub Test Suite                        #
 #          ------------------------------------------------------             #
-#               Arne Sommer - arne@cpan.org  - 10. July 2006                  #
+#               Arne Sommer - arne@cpan.org  - 30. July 2006                  #
 #                                                                             #
 ###############################################################################
 #                                                                             #
@@ -11,7 +11,7 @@
 #                                                                             #
 ###############################################################################
 
-use Test::More tests => 21;
+use Test::More tests => 22;
 
 BEGIN { use_ok('Geo::Postcodes') };
 
@@ -43,5 +43,9 @@ is( Geo::Postcodes::county_of   ("Something or other"), undef, "Postcode > Count
 is( Geo::Postcodes::type_of     ("Something or other"), undef, "Postcode > Type");
 is( Geo::Postcodes::owner_of    ("Something or other"), undef, "Postcode > Owner");
 is( Geo::Postcodes::address_of  ("Something or other"), undef, "Postcode > Address");
+
+#################################################################################
+
+is( Geo::Postcodes::selection   ("and", "postcode" => ".*"), undef, "Selection and");
 
 #################################################################################
