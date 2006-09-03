@@ -1,30 +1,69 @@
 Revision history for Perl extension Geo::Postcodes
 --------------------------------------------------
+2006-09-03 23:30 Arne Sommer
+ * Released version 0.20.
+
+2006-09-03 22:30 Arne Sommer
+ * Fixed the errors and warnings in the documentation, as reported by
+   'podchecker'.
+
+2006-09-03 22:00 Arne Sommer
+ * Added the procedure '_verify_selectionlist', which will false (0) followed
+   by a list of diagnostic messages if the argument list is invalid for use by
+   the 'selection'-procedure. It will return true (1) followed by a modified
+   argument list if the arguments are valid. The modification replaces things
+   as 'and', 'not' with 'and not'. The procedure is callable from the child
+   classes (with some black magic).
+
+2006-09-03 19:00 Arne Sommer
+ * Added the modes 'xor not', 'nor' and 'nor not' in the selection procedure.
+
+2006-09-01 17:00 Arne Sommer
+ * Added the procedures 'get_selectionmodes' and 'get_initial_selectionmodes'
+   to get a (sorted) list of the legal selection modes.
+
+2006-09-01 11:00 Arne Sommer
+ * Added the procedures 'is_legal_selectionmode' and
+   'is_legal_initial_selectionmode' so that application programs easily can
+   check for legal selection modes.
+
+2006-09-01 01:00 Arne Sommer
+ * Added the mode 'none' in the selection procedure. It will return absolutely
+   nothing, and is absolutely useless.
+
+2006-08-31 23:00 Arne Sommer
+ * Added support for the mode 'all' as the first parameter in the selection
+   procedure, as the old version of the procedure had it.
+
+2006-08-31 22:00 Arne Sommer
+ * Added support for the mode 'not' as the first parameter in the selection
+   procedure, as it is clearer than 'and or' or 'and not'.
+
+2006-08-31 16:00 Arne Sommer
+ * Reimplemented the selection procedure, with the following modes only:
+   "and", "or", "and not" (new), "or not" (instead of 'not'), and "xor"
+   (new).
+
 2006-08-17 15:00 Arne Sommer
  * Released version 0.10.
 
 2006-08-16 22:00 Arne Sommer
- * Fixed an error that caused a list with one element
-   (a zero) to be returned instead of 'undef' by
-   selection when no matches was found.
+ * Fixed an error that caused a list with one element (a zero) to be returned
+   instead of 'undef' by selection when no matches were found.
 
 2006-08-05 19:00 Arne Sommer
- * Added support for 'selection("all", ...)'. It does
-   exactly the same as 'get_postcodes' (but sorts the
-   postcodes). It can be used to get them as objects,
-   in oo-mode. This will consume a lot of memory - and
-   time.
+ * Added support for 'selection("all", ...)'. It does exactly the same as
+   'get_postcodes' (but sorts the postcodes). It can be used to get them as
+   objects, in oo-mode. This will consume a lot of memory - and time.
 
 2006-08-05 19:00 Arne Sommer
- * Added support for 'selection("not", ...)'. It will
-   include the postcode if it doesn't match any of the
-   specified method/value pairs.
+ * Added support for 'selection("not", ...)'. It will include the postcode if
+   it doesn't match any of the specified method/value pairs.
 
 2006-07-30 14:00 Arne Sommer
- * Added support in 'selection' for multiple sets
-   of method/value. This requires a choice of how
-   to treat the combination, and this is controlled
-   by the new 'and' and 'or' paramter.
+ * Added support in 'selection' for multiple sets of method/value. This
+   requires a choice of how to treat the combination, and this is controlled
+   by the new 'and' and 'or' parameter.
 
 2006-07-30 09:00 Arne Sommer
  * Renamed the 'methods' procedure/method to 'get_methods'.
@@ -33,26 +72,23 @@ Revision history for Perl extension Geo::Postcodes
  * Released version 0.03.
 
 2006-07-23 10:00 Arne Sommer
- * Simplified the 'selection' code by removing the need
-   for passing a list of legal methods. This is now obtained
-   by the selection code itself.
+ * Simplified the 'selection' code by removing the need for passing a list of
+   legal methods. This is now obtained by the selection code itself.
 
 2006-07-19 22:00 Arne Sommer
- * Added the 'get_types' procedure that returns all the
-   types (of the postal locations). Added the 'type2verbose'
-   procedure to convert the code to an english text.
+ * Added the 'get_types' procedure that returns all the types (of the postal
+   locations). Added the 'type2verbose' procedure to convert the code to an
+   english text.
 
 2006-07-20 18:00 Arne Sommer
  * Made a major rewrite of the documentation.
 
 2006-07-19 14:00 Arne Sommer
- * Merged the national (norwegian and danish) postal
-   type codes, and moved them here. 'type' and 'type_of'
-   will now give the code (instead of the description).
-   Use the new prodeure 'type_verbose_of' and method
-   'type_verbose' for the description. The base class
-   has english texts, but this can be overruled by the
-   derived classes.
+ * Merged the national (norwegian and danish) postal type codes, and moved
+   them here. 'type' and 'type_of' will now give the code (instead of the
+   description). Use the new prodeure 'type_verbose_of' and method
+   'type_verbose' for the description. The base class has english texts, but
+   this can be overruled by the derived classes.
 
 2006-07-18 23:00 Arne Sommer
  * Released version 0.02.
@@ -61,8 +97,8 @@ Revision history for Perl extension Geo::Postcodes
  * Added the 'methods' and 'is_method' method/procedure.
 
 2006-07-15 12:00 Arne Sommer
- * Added the 'selection' method/procedure, and made it
-   callable from the child classes (with some black magic).
+ * Added the 'selection' method/procedure, and made it callable from the child
+   classes (with some black magic).
 
 2006-07-10 16:00 Arne Sommer
  * Released version 0.01.
