@@ -6,3 +6,7 @@ Postcodes/Update.pm
 README
 SUBCLASS
 t/1.t
+t/2_pod.t
+t/2_pod_coverage.t
+t/3_validselection.t
+META.yml                                 Module meta-data (added by MakeMaker)

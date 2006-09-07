@@ -3,7 +3,7 @@ package Geo::Postcodes;
 use strict;
 use warnings;
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 ## Which methods are available ##################################################
 
@@ -64,15 +64,17 @@ sub new
   return $self;
 }
 
-sub DESTROY {
-  my $dead_body = $_[0];
-  delete $postcode_of {$dead_body};
-  delete $location_of {$dead_body};
-  delete $borough_of  {$dead_body};
-  delete $county_of   {$dead_body};
-  delete $type_of     {$dead_body};
-  delete $owner_of    {$dead_body};
-  delete $address_of  {$dead_body};
+sub DESTROY
+{
+  my $object_id = $_[0];
+
+  delete $postcode_of {$object_id};
+  delete $location_of {$object_id};
+  delete $borough_of  {$object_id};
+  delete $county_of   {$object_id};
+  delete $type_of     {$object_id};
+  delete $owner_of    {$object_id};
+  delete $address_of  {$object_id};
 }
 
 sub postcode
@@ -226,17 +228,21 @@ my %legal_mode; $legal_mode{'and'} = $legal_mode{'and not'} =
                 $legal_mode{'or'}  = $legal_mode{'or not'}  =
                 $legal_mode{'xor'} = $legal_mode{'xor not'} = 1;
 
+my %legal_initial_mode; $legal_initial_mode{'all'} = $legal_initial_mode{'none'} =
+                        $legal_initial_mode{'not'} = $legal_initial_mode{'one'}  = 1;
+
 sub is_legal_selectionmode
 {
   my $mode = shift;
-  return $legal_mode{$mode};
+  return 1 if $legal_mode{$mode};
+  return 0;
 }
 
 sub is_legal_initial_selectionmode
 {
   my $mode = shift;
-  return 1 if $mode eq 'all' or $mode eq 'none' or $mode eq 'not';
-  return $legal_mode{$mode};
+  return 1 if $legal_initial_mode{$mode} or $legal_mode{$mode};
+  return 0;
 }
 
 sub get_selectionmodes
@@ -246,7 +252,7 @@ sub get_selectionmodes
 
 sub get_initial_selectionmodes
 {
-  return sort (get_selectionmodes(), 'all', 'none', 'not');
+  return sort (keys %legal_mode, keys %legal_initial_mode);
 }
 
 sub verify_selectionlist
@@ -280,9 +286,11 @@ sub _verify_selectionlist
     push @verbose, "Mode: '$mode' - ok";
 
     return (1, @out) if $mode eq "all" or $mode eq "none";
+    return (1, @out) if $mode eq "one" and @args == 0;
+      # This one can both be used alone, or followed by more.
 
     return (0, @verbose, "Missing method/value pair - not ok") unless @args >= 2;
-      # Missing method/value pair.
+        # Missing method/value pair.
   }
 
   ## Done with the first one
@@ -334,9 +342,43 @@ sub _verify_selectionlist
     }
   }
 
-  return (1, @out) if $status;
+  return (1, @out) if $status; # Return a modified argument list on success.
 
-  return (0, @verbose);
+  return (0, @verbose);        # Return a list of diagnostic meddages on failure.
+}
+
+sub selection_loop
+{
+  return Geo::Postcodes::_selection_loop('Geo::Postcodes', @_);
+    # Black magic.
+}
+
+sub _selection_loop
+{
+  my $caller_class      = shift;
+
+  my $objects_requested = 0; # Not object oriented.
+
+  if ($_[0] eq $caller_class)
+  {
+    $objects_requested  = 1;
+    shift;
+  }
+
+  my $procedure_pointer = shift;
+
+  return 0 unless $procedure_pointer;
+
+  my @selection_clauses = @_;
+  my @postcodes         = _selection($caller_class, @selection_clauses);
+
+  return 0 unless @postcodes;
+
+  foreach (@postcodes)
+  {
+    &$procedure_pointer($objects_requested ? $caller_class->new($_) : $_);
+  } 
+  return 1;
 }
 
 
@@ -392,10 +434,15 @@ sub _selection
     return; # Absolutely nothing.
   }
 
+  my $limit = 0; # Set to one if we have requested only one postcode.
+  if ($_[0] eq "one")
+  {
+    $limit = 1;
+    shift; # Get rid of the mode.
+  } 
+
   my $mode = "and"; 
     # The mode defaults to 'and' unless specified.
-
-  $mode = shift if is_legal_initial_selectionmode($_[0]);
 
   my %out = ();
 
@@ -404,34 +451,44 @@ sub _selection
   my @all = &{&proc_pointer($caller_class . '::get_postcodes')}();
     # Get all the postcodes.
 
-  my $method = shift;
-  return unless &{&proc_pointer($caller_class . '::is_method')}($method);
-    # Return if the specified method is undefined for the class.
-    # As and 'and' with a list with one undefined item gives an empty list.
+  my($method, $current_method, $value, $current_value);
 
-  my $current_method = &proc_pointer($caller_class . '::' . $method .'_of');
-
-  my $value  = shift; $value =~ s/%/\.\*/g;
-  return unless $value;
-    # A validity check is impossible, so this is the next best thing.
-
-  my $current_value;
-
-  foreach my $postcode (@all)
+  if (@_) # As 'one' can be without additional arguments.
   {
-    $current_value = $current_method->($postcode);
-      # Call the procedure with the current postcode as argument
+    $mode = shift if is_legal_initial_selectionmode($_[0]);
 
-    next unless $current_value;
-      # Skip postcodes without this field.
+    $method = shift;
+    return unless &{&proc_pointer($caller_class . '::is_method')}($method);
+      # Return if the specified method is undefined for the class.
+      # As and 'and' with a list with one undefined item gives an empty list.
 
-    my $match = $current_value =~ m{^$value$}i; ## Case insensitive
+    my $current_method = &proc_pointer($caller_class . '::' . $method .'_of');
 
-    if ($mode =~ /not/) { $out{$postcode}++ unless $match; }
-    else                { $out{$postcode}++ if     $match; }
+    $value  = shift; $value =~ s/%/\.\*/g;
+    return unless $value;
+      # A validity check is impossible, so this is the next best thing.
+
+    foreach my $postcode (@all)
+    {
+      $current_value = $current_method->($postcode);
+        # Call the procedure with the current postcode as argument
+
+      next unless $current_value;
+        # Skip postcodes without this field.
+
+      my $match = $current_value =~ m{^$value$}i; ## Case insensitive
+
+      if ($mode =~ /not/) { $out{$postcode}++ unless $match; }
+      else                { $out{$postcode}++ if     $match; }
+    }
+
+    $mode = 'and' if $mode eq 'not';
   }
 
-  $mode = 'and' if $mode eq 'not';
+  elsif ($limit) # just one argument; 'one'.
+  {
+    map { $out{$_} = 1 } @all
+  }
 
   while (@_)
   {
@@ -452,6 +509,10 @@ sub _selection
 
     foreach my $postcode ($mode =~ /and/ ? (keys %out) : @all)
     {
+      # We start with the result from the previous iteration if the mode
+      # is one of the 'and'-family. Otherwise it is one of the 'or'-family,
+      # and we have to start from scratch (@all).
+
       $current_value = $current_method->($postcode);
         # Call the procedure with the current postcode as argument
 
@@ -510,9 +571,19 @@ sub _selection
   return unless %out;
     # Return nothing if we have an empty list (or rather, hash).
 
-  my @out = sort keys %out;
-    # This will give an ordered list, as opposed to a semi random order. This   #
-    # is essential when comparing lists of postcodes, as the test scripts do.   #
+  my @out;
+
+  if ($limit)
+  {
+    my @list = keys %out;
+    @out = $list[rand(@list)];
+  }
+  else
+  {
+    @out = sort keys %out;
+      # This will give an ordered list, as opposed to a semi random order. This #
+      # is essential when comparing lists of postcodes, as the test scripts do. #
+  }
 
   ###############################################################################
 
@@ -594,18 +665,19 @@ can be mixed freely:
 
 =item all
 
-All the postcodes.
+All the postcodes. This mode is only legal as the first argument, and any additional
+arguments are silentliy ignored.
 
  my @postcodes = Geo::Postcodes::XX::selection('all');
 
-This will return I<all> the postcodes. Any additional arguments 
-are silentliy ignored.
+This will return I<all> the postcodes. 
 
 This is the same as I<sort get_postcodes()>. The object oriented version
 (see below for syntax) will return a postcode object for each postcode,
 and can be handy in some circumstances - if time and memory usage is
 of no concern. Otherwise create the postcode objects only when needed,
-inside a I<foreach>-loop on the procedure version.
+inside a I<foreach>-loop on the procedure version - or use
+L<selection_loop>.
 
 =item and
 
@@ -622,7 +694,8 @@ given first
 
 =item and not
 
-The postcode is included in the result if it is included in B<the first, but not the second> the expressions.
+The postcode is included in the result if it is included in B<the first expression,
+but not the second one>.
 
  my @postcodes = Geo::Postcodes::XX::selection(
     $method1 => $string1, 'and not', $method2 => $string2);
@@ -644,6 +717,49 @@ The postcode is included in the result if it is included in B<the second express
 
  my @postcodes = Geo::Postcodes::XX::selection(
     $method1 => $string1, 'nor not', $method2 => $string2);
+
+=item none
+
+This will return absolutely nothing.
+
+This mode is only legal as the first argument, and any additional
+arguments are silentliy ignored.
+
+ my @postcodes = Geo::Postcodes::XX::selection('none');
+
+This will return I<undef>. 
+
+=item not
+
+This mode can be used initially (as the first argument) to negate the first
+method/string pair. It is also possible to use 'and not' or any other
+'xxx not'-mode initially.
+
+Note that 'not' is not a valid mode, and it will default to 'and' for any
+additional method/string pairs if no mode is given.
+
+The following examples are equivalent:
+
+ Geo::Postcodes::XX::selection('not', $method => $string, 'and', $method2 => $string2);
+ Geo::Postcodes::XX::selection('not', $method => $string, $method2 => $string2);
+ Geo::Postcodes::XX::selection('or not', $method => $string, 'and', $method2 => $string2);
+ Geo::Postcodes::XX::selection('and not', $method => $string, 'and', $method2 => $string2);
+
+The following examples are equivalent:
+
+ Geo::Postcodes::XX::selection('or not', $method => $string, $method2 => $string2);
+ Geo::Postcodes::XX::selection('not', $method => $string, 'or not', $method2 => $string2);
+
+=item one
+
+This mode can be used initially to limit the returned list of postcodes to just
+one (or zero). The returned postcode is chosen randomly from the result list.
+
+ Geo::Postcodes::XX::selection('one', $method => $string);
+
+It can also be used on its own, just to get a random postcode.
+
+ Geo::Postcodes::XX::selection('one');
 
 =item or
 
@@ -668,26 +784,6 @@ the second.
     $method1 => $string1, 'or not', $method2 => $string2);
 
 It is also possible to achieved this by using 'or' and a reversed regular expression.
-
-=item not
-
-This mode can be used initially (as the first argument) to negate the first
-method/string pair. It is also possible to use 'and not' or 'or not'.
-
-Note that 'not' is not a valid mode, and it will default to 'and' for any
-additional method/string pairs if no mode is given.
-
-The following examples are equivalent:
-
- Geo::Postcodes::XX::selection('not', $method => $string, 'and', $method2 => $string2);
- Geo::Postcodes::XX::selection('not', $method => $string, $method2 => $string2);
- Geo::Postcodes::XX::selection('or not', $method => $string, 'and', $method2 => $string2);
- Geo::Postcodes::XX::selection('and not', $method => $string, 'and', $method2 => $string2);
-
-The following examples are equivalent:
-
- Geo::Postcodes::XX::selection('or not', $method => $string, $method2 => $string2);
- Geo::Postcodes::XX::selection('not', $method => $string, 'or not', $method2 => $string2);
 
 =item xor (exlusive or)
 
@@ -801,6 +897,33 @@ is wrapped in. Use I<'%(ÅS|SKOG)'> to get the desired result.
 This works just as the procedure version (see above), but will return
 a list of postcode objects (instead of just a list of postcodes).
 
+=head2 selection_loop procedure
+
+The first argument is a pointer to a procedure which will be called for
+each postcode returned by the L<selection> call, with the rest of the
+arguments.
+
+ sub post_check
+ {
+   my $postcode = shift;
+   print "$postcode\n" if log2(md5sum($postcode)) > 3.14;
+ }
+
+ Geo::Postcodes::XX::selection_loop(\&post_check, xxx, yyy);
+
+=head2 selection_loop method
+
+As above, but the value passed to the specified procedure is a postcode
+object.
+
+ sub post_check
+ {
+   my $object = shift;
+   print $object->postcode() . "\n" if log2(md5sum($object->postcode())) > 3.14;
+ }
+
+ Geo::Postcodes::XX->selection_loop(\&post_check, xxx, yyy);
+
 =head1 SUPPORTING PROCEDURES
 
 =head2 Geo::Postcodes::XX::verify_selectionlist
@@ -834,9 +957,9 @@ A sorted list of legal selection modes; 'and', 'and not', 'nor', 'nor not', 'or'
 
 =head2 get_initial_selectionmodes
 
-As above, with the addition of 'all', none' and 'not'. The list is sorted.
+As above, with the addition of 'all', none', 'not' and 'one'. The list is sorted.
 
-=head2 type2verbose procedure
+=head2 type2verbose
 
   my $type_as_english_text  = $Geo::Postcodes::type2verbose($type);
   my $type_as_national_text = $Geo::Postcodes::XX:type2verbose($type);
@@ -844,6 +967,33 @@ As above, with the addition of 'all', none' and 'not'. The list is sorted.
 The child classes are responsible for translating the relevant types to the native language.
 
 See the L<"TYPE"> section for a description of the types.
+
+=head1 OTHER PROCEDURES AND METHODS
+
+=head2 address
+=head2 address_of
+=head2 borough
+=head2 borough_of
+=head2 county
+=head2 county_of
+=head2 get_methods
+=head2 get_postcodes
+=head2 get_types
+=head2 is_method
+=head2 legal
+=head2 location
+=head2 location_of
+=head2 new
+=head2 owner
+=head2 owner_of
+=head2 postcode
+=head2 proc_pointer
+=head2 type
+=head2 type_of
+=head2 type_verbose
+=head2 type_verbose_of
+=head2 valid
+
 
 =head1 TYPE
 

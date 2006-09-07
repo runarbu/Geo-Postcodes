@@ -1,5 +1,29 @@
 Revision history for Perl extension Geo::Postcodes
 --------------------------------------------------
+2006-09-07 19:30 Arne Sommer
+ * Added the test file 't/3_validselection.t' testing the
+   'verify_selectionlist' procedure.
+
+2006-09-07 16:00 Arne Sommer
+ * Added the test files 't/2_pod.t' and 't/2_pod_coverage.t' to
+   check the documentation for errors and completeness, and
+   fixed the reported shortcomings (mostly by dummy lines for
+   now - as the documentation is due for a major reorganisation). 
+
+2006-09-07 14:30 Arne Sommer
+ * Added the selection mode 'one', which will return just one (or zero)
+   postcodes. It must be used initially, can be used on its own, and
+   will return a random postcode.
+
+2006-09-07 13:00 Arne Sommer
+ * Removed the line 'use 5.008' from 'Makefile.PL', as there was no
+   reason for this restriction.
+
+2006-09-04 18:00 Arne Sommer
+ * Added the procedure 'selection_loop' which will call the specified
+   procedure for each resulting postcode from the 'selection' call. It
+   is callable from the child classes (with some black magic).
+
 2006-09-03 23:30 Arne Sommer
  * Released version 0.20.
 
@@ -8,12 +32,12 @@ Revision history for Perl extension Geo::Postcodes
    'podchecker'.
 
 2006-09-03 22:00 Arne Sommer
- * Added the procedure '_verify_selectionlist', which will false (0) followed
-   by a list of diagnostic messages if the argument list is invalid for use by
-   the 'selection'-procedure. It will return true (1) followed by a modified
-   argument list if the arguments are valid. The modification replaces things
-   as 'and', 'not' with 'and not'. The procedure is callable from the child
-   classes (with some black magic).
+ * Added the procedure '_verify_selectionlist', which will return false (0)
+   followed by a list of diagnostic messages if the argument list is invalid
+   for use by the 'selection'-procedure. It will return true (1) followed by a
+   modified argument list if the arguments are valid. The modification process
+   replaces things as 'and', 'not' with 'and not'. The procedure is callable
+   from the child classes (with some black magic).
 
 2006-09-03 19:00 Arne Sommer
  * Added the modes 'xor not', 'nor' and 'nor not' in the selection procedure.

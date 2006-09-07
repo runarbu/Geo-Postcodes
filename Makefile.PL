@@ -1,7 +1,7 @@
-use 5.005;
 use ExtUtils::MakeMaker;
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
+  # See lib/ExtUtils/MakeMaker.pm for details of how to influence
+  # the contents of the Makefile that is written.
+
 WriteMakefile(
     'NAME'		=> 'Geo::Postcodes',
     'VERSION_FROM'	=> 'Postcodes.pm', # finds $VERSION

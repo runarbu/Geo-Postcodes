@@ -88,3 +88,13 @@ sub update
 1;
 
 __END__
+
+=head1 NAME
+
+Geo::Postcodes::Update - Helper module for keeping the postcodes up to date
+
+=head1 Procedures
+
+=head2 update
+
+=cut
