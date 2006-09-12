@@ -2,7 +2,7 @@
 #                                                                             #
 #           Geo::Postcodes Test Suite 3 - Valid selection list                #
 #         ------------------------------------------------------              #
-#             Arne Sommer - perl@bbop.org - 7. September 2006                 #
+#            Arne Sommer - perl@bbop.org - 12. September 2006                 #
 #                                                                             #
 ###############################################################################
 #                                                                             #
@@ -11,7 +11,7 @@
 #                                                                             #
 ###############################################################################
 
-use Test::More tests => 40;
+use Test::More tests => 44;
 
 BEGIN { use_ok('Geo::Postcodes') };
 
@@ -75,6 +75,15 @@ invalid('elephant', 'Dumbo');
   valid('address',  '%s%');
   valid('county',   'F%');
   valid('borough',  '%øy');
+
+###############################################################################
+
+  valid('procedure', \&test);      # But only because it is defined in this file.
+invalid('procedure', \&test2);     # Procedure does not exist.
+  valid('procedure', \&Geo::Postcodes::get_fields);
+invalid('procedure', \&get_fields);
+
+sub test {}
 
 ###############################################################################
 

@@ -1,14 +1,44 @@
 Revision history for Perl extension Geo::Postcodes
 --------------------------------------------------
+2006-09-12 21:00 Arne Sommer
+ * Released version 0.30.
+
+2006-09-12 11:00 Arne Sommer
+ * Added support for external procedures in 'selection', specified as
+   'procedure' => \&procedure_name. The procedure is passed the postcode as
+   argument, and must return true or false. 
+ * Updated 'verify_selectionlist' to support this feature. It verifies that
+   the procedures are actually callable.
+ * Added tests in 't/3_validselection.t'.
+
+2006-09-11 22:00 Arne Sommer
+ * Added a comprehensive tutorial 'Postcodes/Tutorial.pod', using a fictiuos 
+   country Utopia and the module name 'Geo::Postcodes::U2'.
+
+2006-09-11 19:00 Arne Sommer
+ * Moved the documentation for the 'selection' family of procedures/methods to
+   a new file 'Postcodes/Selection.pod'.
+
+2006-09-11 13:00 Arne Sommer
+ * Added the test file 't/4_exporter.t' testing that the available methods and
+   procedures really are available.
+
+2006-09-09 11:00 Arne Sommer
+ * Renamed the procedure/method 'get_methods' to 'get_fields', and 'is_method'
+   to 'is_field', to avoid confusion with the generic name 'method'.
+
+2006-09-07 20:00 Arne Sommer
+ * Released version 0.21.
+
 2006-09-07 19:30 Arne Sommer
  * Added the test file 't/3_validselection.t' testing the
    'verify_selectionlist' procedure.
 
 2006-09-07 16:00 Arne Sommer
- * Added the test files 't/2_pod.t' and 't/2_pod_coverage.t' to
-   check the documentation for errors and completeness, and
-   fixed the reported shortcomings (mostly by dummy lines for
-   now - as the documentation is due for a major reorganisation). 
+ * Added the test files 't/2_pod.t' and 't/2_pod_coverage.t' to check the
+   documentation for errors and completeness, and fixed the reported
+   shortcomings (mostly by dummy lines for now - as the documentation is due
+   for a major reorganisation).
 
 2006-09-07 14:30 Arne Sommer
  * Added the selection mode 'one', which will return just one (or zero)
