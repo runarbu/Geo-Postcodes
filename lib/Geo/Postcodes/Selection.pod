@@ -30,9 +30,12 @@ the field/value pairs, or not at all.
 
 The following examples are equivalent:
 
- Geo::Postcodes::U2::selection('and', $field => $value, $field2 => $value2);
- Geo::Postcodes::U2::selection($field => $value, 'and', $field2 => $value2);
- Geo::Postcodes::U2::selection($field => $value, $field2 => $value2);
+ Geo::Postcodes::U2::selection('and', $field  => $value, 
+                                      $field2 => $value2);
+ Geo::Postcodes::U2::selection(       $field  => $value,
+                               'and', $field2 => $value2);
+ Geo::Postcodes::U2::selection(       $field  => $value,
+                                      $field2 => $value2);
 
 The field/value pairs are evaluated in the specified order, and the modes
 can be mixed freely:
@@ -49,15 +52,15 @@ can be mixed freely:
 =item all
 
 All the postcodes. This mode is only legal as the first argument, and any additional
-arguments are silentliy ignored.
+arguments are silently ignored.
 
  my @postcodes = Geo::Postcodes::U2::selection('all');
 
-This will return I<all> the postcodes. 
+This will return I<all> the postcodes, as a sorted list. 
 
 This is the same as I<sort get_postcodes()>. The object oriented version
 (see below for syntax) will return a postcode object for each postcode,
-and can be handy in some circumstances - if time and memory usage is
+and may be handy in some circumstances - if time and memory usage is
 of no concern. Otherwise create the postcode objects only when needed,
 inside a I<foreach>-loop on the procedure version - or use
 L<selection_loop>.
@@ -123,15 +126,23 @@ additional field/value pairs if no mode is given.
 
 The following examples are equivalent:
 
- Geo::Postcodes::U2::selection('not', $field => $value, 'and', $field2 => $value2);
- Geo::Postcodes::U2::selection('not', $field => $value, $field2 => $value2);
- Geo::Postcodes::U2::selection('or not', $field => $value, 'and', $field2 => $value2);
- Geo::Postcodes::U2::selection('and not', $field => $value, 'and', $field2 => $value2);
+ Geo::Postcodes::U2::selection('not',     $field  => $value,
+                               'and',     $field2 => $value2);
+ Geo::Postcodes::U2::selection('not',     $field  => $value, 
+                                          $field2 => $value2);
+ Geo::Postcodes::U2::selection('or not',  $field  => $value,
+                               'and',     $field2 => $value2);
+ Geo::Postcodes::U2::selection('and not', $field  => $value,
+                               'and',     $field2 => $value2);
+ Geo::Postcodes::U2::selection('and not', $field  => $value,
+                                          $field2 => $value2);
 
 The following examples are equivalent:
 
- Geo::Postcodes::U2::selection('or not', $field => $value, $field2 => $value2);
- Geo::Postcodes::U2::selection('not', $field => $value, 'or not', $field2 => $value2);
+ Geo::Postcodes::U2::selection('or not', $field  => $value,
+                                         $field2 => $value2);
+ Geo::Postcodes::U2::selection('not',    $field  => $value,
+                               'or not', $field2 => $value2);
 
 =item one
 
@@ -295,9 +306,24 @@ The procedure is passed the postcode, and must return true or false.
 This works just as the procedure version (see above), but will return
 a list of postcode objects (instead of just a list of postcodes).
 
+=head2 When not to use Selection
+
+Do not use I<selection> when you are after a single postcode, but use
+the constructor (the I<new> call) or the I<xxx_of> procedures to access
+the values of the fields directly.
+
+  my @obj_list = Geo::Postcodes::U2->selection('postcode' -> '1178');
+  my $obj      = Geo::Postcodes::U2->new('1178');
+
+Using I<selection> causes a loop that iterates over all the postcodes, and
+this is not a good idea when you have the answer already - a single postcode.
+
+The C<valid> procedure can be used to check if the postcode actually
+exist. See the tutorial.
+
 =head1 SELECTION_LOOP
 
-It is possible, even adviceable, to use external procedures in the argumnet
+It is possible, even adviceable, to use external procedures in the argument
 list to the I<selection> call itself, if the procedure is only used to select
 from the postcodes. The procedure shown in this section have a I<print>
 statement, and is okay - if somewhat contrived.
@@ -333,14 +359,17 @@ object.
 
 =head2 verify_selectionlist
 
-Use this procedure from the child class to verify that the arguments are valid
-for use by the selection procedure/method.
+The I<selection> procedure/method will return an empty list, if there are
+errors in the argument list, or if the selection did not find any matches. Use
+this procedure (from the child class) to verify that the arguments are valid
+for use by the I<selection> procedure/method.
 
  my($status, @list) = Geo::Postcodes::U2::verify_selectionlist(@arguments);
 
 A status value of true (1) is followed by a modified version of the original
-arguments. This will replace things as 'and' 'not' by 'and not', as the selection
-procedure does not accept the former.
+arguments. This will replace things as 'and' 'not' by 'and not', but the
+I<selection> procedure/method copes with both. (The returned list may be
+optimised in future versions of the module.)
 
 A status value of false (0) is followed by a list of diagnostic messages, up to
 the point where the verification failed.
@@ -365,7 +394,8 @@ A sorted list of legal selection modes; 'and', 'and not', 'nor', 'nor not', 'or'
 
 =head2 Geo::Postcodes::get_initial_selectionmodes
 
-As above, with the addition of 'all', none', 'not' and 'one'. The list is sorted.
+As L<Geo::Postcodes::get_selectionmode>, with the addition of 'all', none',
+'not' and 'one'. The list is sorted.
 
 =head1 SEE ALSO
 
@@ -374,13 +404,11 @@ I<man Geo::Postcodes::Tutorial>, and the documentation for the individual
 country modules; e.g. I<perldoc Geo::Postcodes::NO> or
 I<man Geo::Postcodes::NO>.
 
-=head1 AUTHOR
+=head1 COPYRIGHT AND LICENCE
 
-Arne Sommer, E<lt>perl@bbop.orgE<gt>
+Copyright (C) 2006 by Arne Sommer - perl@bbop.org
 
-=head1 LICENSE
-
-This document is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
+This library is free software; you can redistribute them and/or modify
+it under the same terms as Perl itself.
 
 =cut

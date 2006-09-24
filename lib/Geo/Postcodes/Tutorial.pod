@@ -93,7 +93,7 @@ The borough where the postcode is located.
 
 This field is not used by danish postcodes.
 
-=head2 county
+=head2 county - county_of
 
  $county = $P->county();
  $county = $Geo::Postcodes::U2::county_of($postcode);
@@ -265,7 +265,7 @@ printed labels are slightly different than in the previous example.
 
 =head2 get_fields
 
-Use this procedure/method to get a list of the supported ields for utopian
+Use this procedure/method to get a list of the supported fields for utopian
 postcodes.
 
   my @fields = Geo::postcodes::U2::get_fields();
@@ -506,7 +506,7 @@ and "C<eg/multiselectionc_no>" in the norwegian distributions. The line
 numbers are used for clarity only.
 
 Specify a field and a value on the command line, e.g.
-"C<multiselection_u2 xxxxxxxxxxxxxx>". 
+"C<multiselection_u2 postcode %12>" (for postcodes ending with '12'). 
 
  01 #! /usr/bin/perl -w
  02 use strict;
@@ -537,7 +537,9 @@ otherwise.
 
 We use several procedures to show the legal modes and fields. This ensures
 that we do not have to update the program if we add new modes or fields in the
-modules later on.
+modules later on (and that the code, as shown, will work for all country
+modules; after substituting 'U2' and 'u2' with another country code.) 
+).
 
  21   print "Diagnostic output:\n";
  22   foreach (@lines)
@@ -580,8 +582,8 @@ of field/value, combined together with the logical operators 'and', 'or' and
 so on.
 
 It is also possible to call external procedures, and have them decide if the
-postcode should be included. Specify C<'procedure', \&procedure_to_do_the_job>
-instead of a field/value pair.
+postcode should be included. Specify C<'procedure'> and
+C<\&procedure_to_do_the_job>, instead of a field/value pair.
 
 The procedure is passed the postcode, and must return true or false.
 
@@ -596,7 +598,7 @@ Passing a pointer to a non-existing procedure to I<selection> will result in
 an empty list in return. I<verify_selectionlist> can be used to check that
 any specified procedures actually exist.
 
-=head2 A fourth example
+=head2 A fourth program
 
 This sample program is available as "C<eg/static_dk>" in the danish, and
 "C<eg/static_no>" in the norwegian distributions. The line numbers are used
@@ -618,6 +620,7 @@ be done by a regular expression. This module was chosen.
 We start with a regular expression, matching postcodes where the first and
 fourth digit are identical, as is the second and third.
 
+ 06 print "All norwegian postcodes where (...),\n";
  06 print "All norwegian postcodes where :\n";
  07 my @postcodes = Geo::Postcodes::NO::selection(@arg1);
  08 print join ",", @postcodes; print ".\n\n";
@@ -657,14 +660,12 @@ The latest version of everyting is available on CPAN, but see also the library
 home page; F<http://bbop.org/perl/GeoPostcodes> for additional information and
 sample usage.
 
-=head1 AUTHOR
+=head1 COPYRIGHT AND LICENCE
 
-Arne Sommer, E<lt>perl@bbop.orgE<gt>
+Copyright (C) 2006 by Arne Sommer - perl@bbop.org
 
-=head1 LICENSE
-
-This tutorial is free; you can redistribute it and/or modify it under
-the same terms as Perl itself.
+This library is free software; you can redistribute them and/or modify
+it under the same terms as Perl itself.
 
 =cut
 

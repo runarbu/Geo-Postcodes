@@ -1,15 +1,16 @@
 Changes
 MANIFEST
+Build.PL
 Makefile.PL
-Postcodes.pm
-Postcodes/Selection.pod
-Postcodes/Subclass.pod
-Postcodes/Tutorial.pod
-Postcodes/Update.pm
+lib/Geo/Postcodes.pm
+lib/Geo/Postcodes/Selection.pod
+lib/Geo/Postcodes/Subclass.pod
+lib/Geo/Postcodes/Tutorial.pod
+lib/Geo/Postcodes/Update.pm
 README
 t/1.t
 t/2_pod.t
 t/2_pod_coverage.t
 t/3_validselection.t
 t/4_exporter.t
-META.yml                                 Module meta-data (added by MakeMaker)
+META.yml

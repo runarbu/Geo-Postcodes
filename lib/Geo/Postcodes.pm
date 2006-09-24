@@ -1,9 +1,15 @@
 package Geo::Postcodes;
 
+#################################################################################
+#                                                                               #
+#           This file is written by Arne Sommer - perl@bbop.org                 #
+#                                                                               #
+#################################################################################
+
 use strict;
 use warnings;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 ## Which methods are available ##################################################
 
@@ -283,7 +289,7 @@ sub _verify_selectionlist
   {
     my $mode = shift @args;
 
-    if (@args and $args[0] eq "not" and is_legal_selectionmode("$mode $args[0]"))
+    if (@args and $args[0] eq "not" and is_legal_initial_selectionmode("$mode $args[0]"))
     {
       $mode = "$mode $args[0]";
       shift @args;
@@ -349,7 +355,7 @@ sub _verify_selectionlist
       my $procedure = shift(@args);
       if (ref $procedure eq "CODE")
       {
-        if (defined(&$procedure))
+        if (_valid_procedure_pointer($procedure))
         {
           push @out, $procedure;
           push @verbose, "Procedure pointer: '$procedure' - ok";
@@ -489,7 +495,17 @@ sub _selection
 
   if (@_) # As 'one' can be without additional arguments.
   {
-    $mode = shift if is_legal_initial_selectionmode($_[0]);
+    if (is_legal_initial_selectionmode($_[0]))
+    {
+      if ($_[1] eq "not" and is_legal_initial_selectionmode("$_[0] $_[1]"))
+      {
+        $mode = shift; $mode .= " "; $mode .= shift;
+      }
+      else
+      {
+        $mode = shift if is_legal_initial_selectionmode($_[0]);
+      }
+    }
 
     $field = shift;
 
@@ -546,8 +562,19 @@ sub _selection
 
   while (@_)
   {
-    $mode = shift if is_legal_selectionmode($_[0]);
-      # Use the one already on hand, if none is given.
+    if (is_legal_selectionmode($_[0]))
+    {
+      if ($_[1] eq "not" and is_legal_selectionmode("$_[0] $_[1]"))
+      {
+        $mode = shift; $mode .= " "; $mode .= shift;
+      }
+      else
+      {
+        $mode = shift if is_legal_selectionmode($_[0]);
+      }
+    }
+
+    # Use the one already on hand, if none is given.
 
     my $is_procedure = 0;
     my $procedure;
@@ -650,10 +677,10 @@ sub _selection
 
   my @out;
 
-  if ($limit)
-  {
-    my @list = keys %out;
-    @out = $list[rand(@list)];
+  if ($limit)                   # The caller has requested just one postcode,   #
+  {                             #  and will get exactly that if any matches     #
+    my @list = keys %out;       #  were found. The returned postcode is chosen  #
+    @out = $list[rand(@list)];  #  by random.                                   #
   }
   else
   {
@@ -686,7 +713,8 @@ sub _proc_pointer
 sub _valid_procedure_pointer
 {
   my $ptr = shift;
-  return 1 if ref $ptr eq "CODE";
+  return 0 if ref $ptr ne "CODE";
+  return 1 if defined(&$ptr);
   return 0;
 }
 
@@ -722,9 +750,9 @@ useless on its own.
 
 =head1 PROCEDURES AND METHODS
 
-These procedures and methods should, with a few exceptions, not be used directly.
-
-See the documentation for the indiviual country modules for usage details.
+These procedures and methods should, with a few exceptions, not be used directly,
+but from a country module. See the documentation for the indiviual country modules
+for usage details.
 
 =head2 address, borough, county, location, owner, postcode, type, type_verbose
 
@@ -735,6 +763,8 @@ modules can support as many of them as needed, and add new ones.
        type_of, type_verbose_of
 
 Procedures that returns the value of the corresponding field for the given postcode.
+They will return I<undef> if the postcode does not exist, or the field is without
+value for the given postcode.
 
 =head2 get_fields, is_field
 
@@ -835,22 +865,27 @@ This is the base class for the Geo::Postcodes::* modules.
 
 =head1 CAVEAT
 
-This module uses "inside out objects".
+This module uses I<inside out objects>, see for instance
+L<http://www.stonehenge.com/merlyn/UnixReview/col63.html> for a discussion of
+the concept.
 
 =head1 SEE ALSO
+
+See also the selection manual (I<perldoc Geo::Postcodes::Selection> or
+I<man Geo::Postcodes::Selection>) for usage details, and the tutorial
+(I<perldoc Geo::Postcodes::Tutorial> or I<man Geo::Postcodes::Tutorial>) 
+for sample code.
 
 The latest version of this library should always be available on CPAN, but see
 also the library home page; F<http://bbop.org/perl/GeoPostcodes> for additional
 information and sample usage. The child classes that can be found there have
 some sample programs.
 
-=head1 AUTHOR
+=head1 COPYRIGHT AND LICENCE
 
-Arne Sommer, E<lt>perl@bbop.orgE<gt>
+Copyright (C) 2006 by Arne Sommer - perl@bbop.org
 
-=head1 LICENSE
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
+This library is free software; you can redistribute them and/or modify
+it under the same terms as Perl itself.
 
 =cut

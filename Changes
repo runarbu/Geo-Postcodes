@@ -1,5 +1,38 @@
 Revision history for Perl extension Geo::Postcodes
 --------------------------------------------------
+2006-09-24 14:00 Arne Sommer
+ * Released version 0.31.
+
+2006-09-24 13:00 Arne Sommer
+ * Rewritetten 'selection' to cope with modes as 'and', 'not' (instead of
+   the correct 'and not'), as already done in 'verify_selectionlist'.
+
+2006-09-22 22:00 Arne Sommer
+ * Removed the procedure 'dryrun' in 'Geo::Postcodes::Update', and made it
+   the default mode. Updated the country programs so that they must use
+   '-update' on the command line to actually update the module.
+
+2006-09-16 20:00 Arne Sommer
+ * Added the procedure 'dryrun' to 'Geo::Postcodes::Update'. Use it, instead
+   of 'update', to get the perl code printed to the screen instead of beeing
+   written to the module. This is useful when writing the parsing procedure.
+
+2006-09-15 22:00 Arne Sommer
+ * 'Geo::Postcodes::Update::update' will now offer to download the postcode
+   file from internet, if possible.
+
+2006-09-15 10:00 Arne Sommer
+ * 'Geo::Postcodes::Update::update' will now check the new data against the
+    existing, and only update the file if they differ. Added a version number
+    (0.31) at the same time.
+
+2006-09-14 23:00 Arne Sommer
+ * Added support for 'Build.PL', in addition to the present 'Makefile.PL'.
+   This reqired a new directory lib in the distribution, and the move of
+   the files 'Postcodes*' to it. 
+ * Updated 'Update.pm' to cope with the move of 'bin/update' to 'misc/update'
+   in the child modules.
+
 2006-09-12 21:00 Arne Sommer
  * Released version 0.30.
 
@@ -95,7 +128,7 @@ Revision history for Perl extension Geo::Postcodes
 
 2006-08-31 16:00 Arne Sommer
  * Reimplemented the selection procedure, with the following modes only:
-   "and", "or", "and not" (new), "or not" (instead of 'not'), and "xor"
+   'and', 'or', 'and not' (new), 'or not' (instead of 'not'), and 'xor'
    (new).
 
 2006-08-17 15:00 Arne Sommer
@@ -106,12 +139,12 @@ Revision history for Perl extension Geo::Postcodes
    instead of 'undef' by selection when no matches were found.
 
 2006-08-05 19:00 Arne Sommer
- * Added support for 'selection("all", ...)'. It does exactly the same as
+ * Added support for 'selection('all', ...)'. It does exactly the same as
    'get_postcodes' (but sorts the postcodes). It can be used to get them as
    objects, in oo-mode. This will consume a lot of memory - and time.
 
 2006-08-05 19:00 Arne Sommer
- * Added support for 'selection("not", ...)'. It will include the postcode if
+ * Added support for 'selection('not', ...)'. It will include the postcode if
    it doesn't match any of the specified method/value pairs.
 
 2006-07-30 14:00 Arne Sommer
@@ -158,4 +191,4 @@ Revision history for Perl extension Geo::Postcodes
  * Released version 0.01.
 
 2006-07-07 19:00 Arne Sommer
- * Original version; created by "h2xs -Xan Geo::Postcodes".
+ * Original version; created by 'h2xs -Xan Geo::Postcodes'.

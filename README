@@ -1,11 +1,18 @@
 Geo::Postcodes::README
 -------------------------------------------------------------
 This module is the parent class of the Geo::Postcodes::XX modules,
-where XX is the two letter country code. 
+where XX is a two letter country code. 
 
 INSTALLATION
 
-To install this module type the following:
+To install this module type the following, if you are using Build.PL:
+
+   perl Build.PL
+  ./Build
+  ./Build test
+  ./Build install
+
+Or the following, if you are using MakeMaker:
 
    perl Makefile.PL
    make
@@ -21,11 +28,12 @@ USAGE
 Do not use this module directly, but one of the Geo::Postcodes::XX 
 subclasses.
 
-See the file SUBCLASS for information on how to subclass this module.
+See the Subclass.pod document (when written!) for information on how
+to subclass this module.
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2006 by Arne Sommer - arne@cpan.org
+Copyright (C) 2006 by Arne Sommer - perl@bbop.org
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 
