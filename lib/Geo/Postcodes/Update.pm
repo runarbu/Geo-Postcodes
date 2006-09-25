@@ -11,7 +11,7 @@ use warnings;
 
 use LWP::Simple (); 
 
-our $VERSION = '0.31';
+our $VERSION = '0.311';
 
 #################################################################################
 
@@ -246,7 +246,11 @@ code for inclusion in the module.
 
 Run the program from the root (or the I<./misc>) directory of the distribution.
 
-=head1 THE UPDATE PROCEDURE
+=head1 PROCEDURES
+
+This module has only one external procedure.
+
+=head2 update
 
 Call this procedure with the following four parameters:
 
