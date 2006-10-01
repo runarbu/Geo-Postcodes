@@ -1,11 +1,11 @@
 =head1 NAME
 
 Geo::Postcodes::Selection - How to use the selection procedure/method of the
-Geo::Postcodes::* modules
+Geo::Postcodes::* modules.
 
 =head1 INTRODUCTION
 
-This file uses the fictious country I<Utopia> (with country code 'U2'),
+This document uses the fictious country I<Utopia> (with country code 'U2'),
 and the rest of this document will refer to the non-existent module
 C<Geo::Postcodes::U2>.
 
@@ -46,6 +46,22 @@ can be mixed freely:
                      'or not', $field3 => $value3,
                      'and not, $field4 => $value4,
                      'xor',    $field5 => $value5);
+
+=head3 Modes
+
+The modes (except 'all', 'none', 'not', and 'one') can be summarised by the
+following truth table:
+
+ A  B | and and nand nand nor nor  or or  xnor xnor xor xor
+      |     not      not      not     not      not      not
+ -----+----------------------------------------------------
+ 0  0 |  0   0   1    1    1   0   0   1   1    0    0   1
+ 0  1 |  0   0   1    1    0   1   1   0   0    1    1   0
+ 1  0 |  0   1   1    0    0   0   1   1   0    1    1   0
+ 1  1 |  1   0   0    1    0   0   1   1   1    0    0   1
+
+Using 'not' after the mode negates the second argument, and the 'nxxx'
+variants negate the result.
 
 =over
 
@@ -88,6 +104,22 @@ but not the second one>.
 
 Return the postcodes I<not> matching any of the field/value pairs. (This is the same as
 C<all - or>, on sets of postcodes.)
+
+=item nand
+
+The postcode is included in the result if it is included in B<none or only
+one> of the expressions.
+
+ my @postcodes = Geo::Postcodes::U2::selection(
+    $field1 => $value1, 'nand', $field2 => $value2);
+
+=item nand not
+
+The postcode is included in the result unless it is included in B<the first
+but not the second expression only>.
+
+ my @postcodes = Geo::Postcodes::U2::selection(
+    $field1 => $value1, 'nand not', $field2 => $value2);
 
 =item nor
 
@@ -171,13 +203,28 @@ given first
 
 =item or not
 
-The postcode is included in the result if it is included in B<the first> expression, but not
-the second.
+The postcode is included in the result unless it is B<included in the second
+expression only>.
 
  my @postcodes = Geo::Postcodes::U2::selection(
     $field1 => $value1, 'or not', $field2 => $value2);
 
 It is also possible to achieved this by using 'or' and a reversed regular expression.
+
+=item xnor
+
+The postcode is included in the result if it is included in B<none or both> expressions.
+
+ my @postcodes = Geo::Postcodes::U2::selection(
+    $field1 => $value1, 'xnor', $field2 => $value2);
+
+=item xnor not
+
+The postcode is included in the result if it is included in B<only one of> the
+expressions. This mode is the same as 'xor'.
+
+ my @postcodes = Geo::Postcodes::U2::selection(
+    $field1 => $value1, 'xnor not', $field2 => $value2);
 
 =item xor (exlusive or)
 
@@ -188,10 +235,12 @@ The postcode is included in the result if it is included in B<only one of> the e
 
 =item xor not
 
-The postcode is included in the result if it is included in B<the first but not the second>
+The postcode is included in the result if it is included in B<both or none> of
 the expressions.
 
 =back
+
+=head3 The Search Value
 
 The search value is parsed as the regular expression C<m{^$value$}i>.
 This has the following implications:
@@ -389,8 +438,8 @@ C<get_initial_selectionmodes>, documented below.
 
 =head2 Geo::Postcodes::get_selectionmodes
 
-A sorted list of legal selection modes; 'and', 'and not', 'nor', 'nor not', 'or',
-'or not', 'xor' and 'xor not'.
+A sorted list of legal selection modes; 'and', 'and not', 'nand', 'nand not',
+'nor', 'nor not', 'or', 'or not', 'xnor', 'xnor not', 'xor' and 'xor not'.
 
 =head2 Geo::Postcodes::get_initial_selectionmodes
 

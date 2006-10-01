@@ -1,10 +1,23 @@
 Revision history for Perl extension Geo::Postcodes
 --------------------------------------------------
+2006-10-01 22:00 Arne Sommer
+ * Released version 0.32.
+
+2006-10-01 14:00 Arne Sommer
+ * Added the new selection modes 'nand', 'nand not', 'xnor', and 'xnor not'.
+
+2006-09-30 22:00 Arne Sommer
+ * Written the 'Geo::Postcodes::Ajax.pod' tutorial, showing how the
+   'Geo::postcodes::*'-modules can be combined with ajax code in a html form
+   to get the location updated automatically. The files in the tutorial are
+   included in the distribution: 'eg/index.html', 'eg/location_u2.cgi' and
+   'postcodecheck.js'.
+
 2006-09-25 22:30 Arne Sommer
  * Released version 0.311.
 
 2006-09-25 22:00 Arne Sommer
- * Fixed an error in the documentation for 'Geo__postcodes::Update' that
+ * Fixed an error in the documentation for 'Geo::postcodes::Update' that
    caused an error in the test file 't/2_pod_coverage'.
 
 2006-09-24 14:00 Arne Sommer
@@ -52,7 +65,7 @@ Revision history for Perl extension Geo::Postcodes
  * Added tests in 't/3_validselection.t'.
 
 2006-09-11 22:00 Arne Sommer
- * Added a comprehensive tutorial 'Postcodes/Tutorial.pod', using a fictiuos 
+ * Added a comprehensive tutorial 'Postcodes::Tutorial.pod', using a fictiuos 
    country Utopia and the module name 'Geo::Postcodes::U2'.
 
 2006-09-11 19:00 Arne Sommer

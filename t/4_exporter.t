@@ -5,11 +5,6 @@
 #             Arne Sommer - perl@bbop.org - 11. September 2006                #
 #                                                                             #
 ###############################################################################
-#                                                                             #
-# Before `make install' is performed this script should be runnable with      #
-# `make test'. After `make install' it should work as `perl 4_exporter.t'.    #
-#                                                                             #
-###############################################################################
 
 # Note that the module do not export anything at present. This may change.    #
 

@@ -242,7 +242,7 @@ Geo::Postcodes::Update - Helper module for keeping the postcodes up to date
 
 This is how the norwegian postcodes are treated, without showing the inner workings of
 I<parse_no> which receives the lines from the file I<tilbud5> and returns suitable perl
-code for inclusion in the module.
+code for inclusion in the module. (The program is included as I<misc/update_no> in the norwegian module.)
 
 Run the program from the root (or the I<./misc>) directory of the distribution.
 

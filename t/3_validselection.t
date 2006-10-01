@@ -2,16 +2,11 @@
 #                                                                             #
 #           Geo::Postcodes Test Suite 3 - Valid selection list                #
 #         ------------------------------------------------------              #
-#            Arne Sommer - perl@bbop.org - 12. September 2006                 #
-#                                                                             #
-###############################################################################
-#                                                                             #
-# Before `make install' is performed this script should be runnable with      #
-# `make test'. After `make install' it should work as `3_validselection.t'.   #
+#            Arne Sommer - perl@bbop.org - 01. October   2006                 #
 #                                                                             #
 ###############################################################################
 
-use Test::More tests => 44;
+use Test::More tests => 54;
 
 BEGIN { use_ok('Geo::Postcodes') };
 
@@ -35,6 +30,13 @@ invalid('and not');
   valid('and not',    'postcode', '12..');
   valid('and', 'not', 'postcode', '12..');
 
+invalid('nand');
+  valid('nand', 'postcode', '12..');
+
+invalid('nand not');
+  valid('nand not',    'postcode', '12..');
+  valid('nand', 'not', 'postcode', '12..');
+
 invalid('not');
   valid('not', 'postcode', '12..');
   valid('not', 'postcode', '12..', 'postcode', '..9.');
@@ -52,6 +54,13 @@ invalid('nor');
 invalid('nor not');
   valid('nor not',    'postcode', '12..');
   valid('nor', 'not', 'postcode', '12..');
+
+invalid('xnor');
+  valid('xnor', 'postcode', '12..');
+
+invalid('xnor not');
+  valid('xnor not',    'postcode', '12..');
+  valid('xnor', 'not', 'postcode', '12..');
 
 invalid('xor');
   valid('xor', 'postcode', '12..');

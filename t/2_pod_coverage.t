@@ -6,13 +6,8 @@
 #                                                                             #
 ###############################################################################
 #                                                                             #
-# Before `make install' is performed this script should be runnable with      #
-# `make test'. After `make install' it should work as `perl 2_pod_coverage.t'.#
-#                                                                             #
-###############################################################################
-#                                                                             #
 # Note that the tests in this file file requires 'List::MoreUtils' to work.   #
-# Thet will be skipped otherwise.                                             #
+# They will be skipped otherwise.                                             #
 #                                                                             #
 ###############################################################################
 

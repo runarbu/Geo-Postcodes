@@ -9,7 +9,7 @@ package Geo::Postcodes;
 use strict;
 use warnings;
 
-our $VERSION = '0.311';
+our $VERSION = '0.32';
 
 ## Which methods are available ##################################################
 
@@ -235,10 +235,12 @@ sub type2verbose
 }
 
 my %legal_mode;
-   $legal_mode{'and'} = $legal_mode{'and not'}   = 1;
-   $legal_mode{'nor'} = $legal_mode{'nor not'}   = 1;
-   $legal_mode{'or'}  = $legal_mode{'or not'}    = 1;
-   $legal_mode{'xor'} = $legal_mode{'xor not'}   = 1;
+   $legal_mode{'and'}  = $legal_mode{'and not'}  = 1;
+   $legal_mode{'nand'} = $legal_mode{'nand not'} = 1;
+   $legal_mode{'nor'}  = $legal_mode{'nor not'}  = 1;
+   $legal_mode{'or'}   = $legal_mode{'or not'}   = 1;
+   $legal_mode{'xnor'} = $legal_mode{'xnor not'} = 1;
+   $legal_mode{'xor'}  = $legal_mode{'xor not'}  = 1;
 
 my %legal_initial_mode;
    $legal_initial_mode{'all'} = $legal_initial_mode{'none'} = 1;
@@ -633,6 +635,18 @@ sub _selection
       {
         delete $out{$postcode} if     $match;
       }
+
+      elsif ($mode eq "nand")
+      {
+        if ($match and $out{$postcode})   { delete $out{$postcode} if $out{$postcode}; }
+        else                              { $out{$postcode}++;                         }
+      }
+      elsif ($mode eq "nand not")
+      {
+        if (!$match and $out{$postcode})  { delete $out{$postcode} if $out{$postcode}; }
+        else                              { $out{$postcode}++;                         }
+      }
+
       elsif ($mode eq "or")
       {
         $out{$postcode}++      if     $match;
@@ -640,6 +654,16 @@ sub _selection
       elsif ($mode eq "or not")
       { 
         $out{$postcode}++      unless $match;
+      }
+      elsif ($mode eq "nor")
+      {
+        if (!$match and !$out{$postcode}) { $out{$postcode}++;                         }
+        else                              { delete $out{$postcode} if $out{$postcode}; }
+      }
+      elsif ($mode eq "nor not")
+      {
+        if ($match and !$out{$postcode})  { $out{$postcode}++;                         }
+        else                              { delete $out{$postcode} if $out{$postcode}; }
       }
       elsif ($mode eq "xor")
       {
@@ -657,15 +681,30 @@ sub _selection
            else                 { $out{$postcode}++;      }
         }
       }
-      elsif ($mode eq "nor")
+
+      elsif ($mode eq "xnor")
       {
-        if (!$match and !$out{$postcode}) { $out{$postcode}++;                         }
-        else                              { delete $out{$postcode} if $out{$postcode}; }
+        my $boolean = $out{$postcode} ? 1 : 0;
+        if ($match == $boolean)
+        {
+          $out{$postcode}++;
+        }
+        else
+        {
+          delete $out{$postcode} if $out{$postcode};
+        }
       }
-      elsif ($mode eq "nor not")
+      elsif ($mode eq "xnor not")
       {
-        if ($match and !$out{$postcode})  { $out{$postcode}++;                         }
-        else                              { delete $out{$postcode} if $out{$postcode}; }
+        my $boolean = $out{$postcode} ? 1 : 0;
+        if ($match != $boolean)
+        {
+          $out{$postcode}++;
+        }
+        else
+        {
+          delete $out{$postcode} if $out{$postcode};
+        }
       }
     }
   }
@@ -872,9 +911,12 @@ the concept.
 =head1 SEE ALSO
 
 See also the selection manual (I<perldoc Geo::Postcodes::Selection> or
-I<man Geo::Postcodes::Selection>) for usage details, and the tutorial
+I<man Geo::Postcodes::Selection>) for usage details, the tutorial
 (I<perldoc Geo::Postcodes::Tutorial> or I<man Geo::Postcodes::Tutorial>) 
-for sample code.
+for sample code, and the ajax tutorial (I<perldoc Geo::Postcodes::Ajax> or
+I<man Geo::Postcodes::Ajax>) for information on using the modules in
+combination with ajax code in a html form to get the location updated
+automatically.
 
 The latest version of this library should always be available on CPAN, but see
 also the library home page; F<http://bbop.org/perl/GeoPostcodes> for additional
