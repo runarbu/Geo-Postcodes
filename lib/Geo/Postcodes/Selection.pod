@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 NAME
 
 Geo::Postcodes::Selection - How to use the selection procedure/method of the

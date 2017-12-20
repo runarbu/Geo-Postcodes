@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 NAME
 
 Geo::Postcodes::Ajax - A Tutorial in how to set up an Ajax service for the
